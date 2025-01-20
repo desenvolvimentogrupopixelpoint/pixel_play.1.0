@@ -40,7 +40,7 @@ EOF
 # Movendo arquivos para os diretórios apropriados
 echo "Baixando e movendo arquivos para os diretórios..."
 curl -fsSL "$BASE_URL/Logo.png" -o /home/pixelpoint/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
-curl -fsSL "$BASE_URL/templates/index.html" -o /home/pixelpoint/templates/index.html || { echo "Erro ao baixar index.html"; exit 1; }
+curl -fsSL "$BASE_URL/templates/Index.html" -o /home/pixelpoint/templates/Index.html || { echo "Erro ao baixar Index.html"; exit 1; }
 curl -fsSL "$BASE_URL/templates/logop.png" -o /home/pixelpoint/templates/logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
 curl -fsSL "$BASE_URL/control_hdmi.sh" -o /root/control_hdmi.sh || { echo "Erro ao baixar control_hdmi.sh"; exit 1; }
 chmod +x /root/control_hdmi.sh
