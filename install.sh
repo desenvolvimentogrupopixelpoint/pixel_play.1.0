@@ -50,7 +50,7 @@ check_success "Criação de ~/.config/mpv/mpv.conf"
 
 # Movendo arquivos para os diretórios apropriados
 echo "Movendo arquivos para os diretórios..."
-cp ./Logo.png /home/pixelpoint/
+cp ./Logo.png /home/
 cp ./templates/index.html /home/pixelpoint/templates/
 cp ./templates/logop.png /home/pixelpoint/templates/
 cp ./control_hdmi.sh /root/control_hdmi.sh
