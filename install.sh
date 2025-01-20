@@ -20,14 +20,14 @@ sudo apt install -y mpv fim python3 python3-pip python3-venv python3-dev libdrm-
 echo "Criando pastas e configurando permissões..."
 mkdir -p ~/.config/mpv
 chmod -R 777 ~/.config/mpv
-mkdir -p /home/pixelpoint/templates
-mkdir -p /home/pixelpoint/videos
-mkdir -p /home/pixelpoint/midias_inativas
-chmod -R 777 /home
+mkdir -p /home/templates
+mkdir -p /home/videos
+mkdir -p /home/midias_inativas
+mkdir -p /home/pixelpoint
+chmod -R 777 /home/templates
+chmod -R 777 /home/videos
+chmod -R 777 /home/midias_inativas
 chmod -R 777 /home/pixelpoint
-chmod -R 777 /home/pixelpoint/templates
-chmod -R 777 /home/pixelpoint/videos
-chmod -R 777 /home/pixelpoint/midias_inativas
 
 # Criando o arquivo mpv.conf
 echo "Configurando mpv.conf..."
@@ -39,29 +39,4 @@ EOF
 
 # Movendo arquivos para os diretórios
 echo "Movendo arquivos para os diretórios..."
-cp "$BASE_DIR/Logo.png" /home/pixelpoint/ || { echo "Erro ao mover Logo.png"; exit 1; }
-cp "$BASE_DIR/templates/Index.html" /home/pixelpoint/templates/ || { echo "Erro ao mover Index.html"; exit 1; }
-cp "$BASE_DIR/templates/logop.png" /home/pixelpoint/templates/ || { echo "Erro ao mover logop.png"; exit 1; }
-cp "$BASE_DIR/play_videos.py" /home/pixelpoint/ || { echo "Erro ao mover play_videos.py"; exit 1; }
-echo "{}" > /home/pixelpoint/metadata.json
-
-# Configurando o serviço play_videos
-echo "Configurando serviço play_videos..."
-cp "$BASE_DIR/play_videos.service" /etc/systemd/system/play_videos.service || { echo "Erro ao mover play_videos.service"; exit 1; }
-chmod 644 /etc/systemd/system/play_videos.service
-sudo systemctl daemon-reload
-sudo systemctl enable play_videos.service
-sudo systemctl start play_videos.service
-
-# Instalando e configurando Tailscale
-echo "Instalando e configurando Tailscale..."
-curl -fsSL https://tailscale.com/install.sh | sh
-sudo systemctl enable tailscaled
-sudo systemctl start tailscaled
-
-# Configurando Tailscale para iniciar
-echo "Configurando Tailscale..."
-sudo tailscale up || { echo "Erro ao conectar Tailscale. Verifique as credenciais ou configuração."; exit 1; }
-
-# Finalizando
-echo "Instalação concluída com sucesso!"
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/Logo.png -o /home/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
