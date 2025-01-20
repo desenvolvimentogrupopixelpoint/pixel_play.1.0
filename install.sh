@@ -37,9 +37,9 @@ EOF
 
 # Movendo arquivos para os diretórios
 echo "Movendo arquivos para os diretórios..."
-cp "$BASE_DIR/Logo.png" /home/ || { echo "Erro ao mover Logo.png"; exit 1; }
-cp "$BASE_DIR/templates/Index.html" /home/templates/ || { echo "Erro ao mover Index.html"; exit 1; }
-cp "$BASE_DIR/templates/logop.png" /home/templates/ || { echo "Erro ao mover logop.png"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/Logo.png -o /home/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Index.html -o /home/templates/Index.html || { echo "Erro ao baixar Index.html"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/logop.png -o /home/templates/logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
 echo "{}" > /home/metadata.json
 
 # Criando o script de controle do HDMI
@@ -115,7 +115,7 @@ sudo /etc/rc.local
 
 # Configurando o serviço play_videos
 echo "Configurando serviço play_videos..."
-cp "$BASE_DIR/play_videos.service" /etc/systemd/system/play_videos.service || { echo "Erro ao mover play_videos.service"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.service -o /etc/systemd/system/play_videos.service || { echo "Erro ao baixar play_videos.service"; exit 1; }
 chmod 644 /etc/systemd/system/play_videos.service
 sudo systemctl enable play_videos.service
 sudo systemctl start play_videos.service
