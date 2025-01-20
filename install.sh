@@ -40,3 +40,38 @@ EOF
 # Movendo arquivos para os diretórios
 echo "Movendo arquivos para os diretórios..."
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/Logo.png -o /home/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Index.html -o /home/templates/Index.html || { echo "Erro ao baixar Index.html"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/logop.png -o /home/templates/logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
+echo "{}" > /home/metadata.json
+
+# Configurando rc.local
+echo "Configurando rc.local..."
+cat <<EOF > /etc/rc.local
+#!/bin/bash
+(sleep 4 && fim -q -a /home/Logo.png) &
+exit 0
+EOF
+chmod +x /etc/rc.local
+sudo /etc/rc.local
+
+# Configurando o serviço play_videos
+echo "Configurando serviço play_videos..."
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.service -o /etc/systemd/system/play_videos.service || { echo "Erro ao baixar play_videos.service"; exit 1; }
+chmod 644 /etc/systemd/system/play_videos.service
+sudo systemctl enable play_videos.service
+sudo systemctl start play_videos.service
+
+# Instalando e configurando Tailscale
+echo "Instalando e configurando Tailscale..."
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo systemctl enable tailscaled
+sudo systemctl start tailscaled
+sudo tailscale status
+
+# Conexão com Tailscale
+echo "Conectando ao Tailscale..."
+sudo tailscale up
+
+# Finalizando
+echo "Instalação concluída com sucesso!"
