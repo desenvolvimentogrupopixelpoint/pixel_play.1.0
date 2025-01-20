@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelPlay</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #001f3f;
+            color: white;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #00264d;
+        }
+        .header img {
+            height: 30px; /* Reduzido para um tamanho menor */
+            width: auto;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Divide exatamente no meio */
+            height: calc(100vh - 70px); /* Desconta a altura do cabeçalho */
+        }
+        .active-media, .inactive-media {
+            background-color: #003366;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .active-media h2, .inactive-media h2 {
+            text-align: center;
+        }
+        .active-media table, .inactive-media table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed; /* Define largura fixa */
+        }
+        .active-media table th, .active-media table td, 
+        .inactive-media table th, .inactive-media table td {
+            border: 1px solid #00509E;
+            padding: 10px;
+            text-align: center;
+            word-wrap: break-word; /* Quebra de palavras longas */
+        }
+        .active-media table th, .inactive-media table th {
+            background-color: #00509E;
+        }
+        .controls {
+            background-color: #00264d;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .controls input, .controls button {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+        .controls button {
+            background-color: #0074D9;
+            color: white;
+            cursor: pointer;
+        }
+        .controls button:disabled {
+            background-color: #00509E;
+            cursor: not-allowed;
+        }
+        .hidden {
+            display: none; /* Adicionado para garantir que o upload-section fique oculto */
+        }
+        .delete-btn {
+            background-color: #FF4C4C;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #FF0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PixelPlay</h1>
+        </div>
+    <div class="container">
+        <div class="active-media">
+            <h2>Mídias Ativas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tamanho (MB)</th>
+                        <th>Início</th>
+                        <th>Fim</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="media-list">
+                    <!-- Populado dinamicamente -->
+                </tbody>
+            </table>
+            <h2>Mídias Inativas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tamanho (MB)</th>
+                        <th>Início</th>
+                        <th>Fim</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="inactive-media-list">
+                    <!-- Populado dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+        <div class="controls">
+<img src="/templates/Logop.png" alt="Logo" style="width: 130px; height: 130px;" />
+
+            <h2>GERENCIADOR DE MÍDIAS</h2>
+            <input type="text" id="tailscale-ip" placeholder="CÓDIGO OU NOME">
+            <button id="connect-btn">Conectar</button>
+
+            <div id="upload-section" class="hidden">
+                <h3>Enviar Mídia</h3>
+                <input type="file" id="file-input" style="display: none;">
+                <button id="select-file-btn">Selecionar Mídia</button>
+                <span id="file-name">Nenhum arquivo selecionado</span>
+                <br>
+                <label for="start-time">Início:</label>
+                <input type="datetime-local" id="start-time">
+                <label for="end-time">Fim:</label>
+                <input type="datetime-local" id="end-time">
+                <button id="upload-btn" disabled>Enviar Mídia</button>
+                <p id="upload-status"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mediaList = document.getElementById('media-list');
+        const inactiveMediaList = document.getElementById('inactive-media-list');
+        const connectBtn = document.getElementById('connect-btn');
+        const selectFileBtn = document.getElementById('select-file-btn');
+        const fileInput = document.getElementById('file-input');
+        const fileNameSpan = document.getElementById('file-name');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadStatus = document.getElementById('upload-status');
+        const tailscaleIpInput = document.getElementById('tailscale-ip');
+        const uploadSection = document.getElementById('upload-section');
+
+        let refreshInterval;
+
+        // Conectar ao servidor
+        connectBtn.addEventListener('click', () => {
+            const ip = tailscaleIpInput.value.trim();
+            if (!ip) {
+                alert('Por favor, insira o IP do servidor.');
+                return;
+            }
+
+            fetchData(ip);
+            startRefresh(ip);
+            uploadSection.classList.remove('hidden'); // Mostra a seção de upload
+        });
+
+        // Função para buscar dados do servidor
+        function fetchData(ip) {
+            fetch(`http://${ip}:5000/list`, { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao conectar ao servidor.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    populateMediaList(data.active);
+                    populateInactiveMediaList(data.inactive);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Erro ao conectar. Certifique-se de que o servidor está ativo.');
+                });
+        }
+
+        // Função para iniciar o refresh automático
+        function startRefresh(ip) {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(() => fetchData(ip), 5000); // Atualiza a cada 5 segundos
+        }
+
+        // Selecionar arquivo
+        selectFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                fileNameSpan.textContent = file.name;
+                uploadBtn.disabled = false;
+            } else {
+                fileNameSpan.textContent = 'Nenhum arquivo selecionado';
+                uploadBtn.disabled = true;
+            }
+        });
+
+        // Enviar mídia
+        uploadBtn.addEventListener('click', () => {
+    const ip = tailscaleIpInput.value.trim();
+    const startTime = document.getElementById('start-time').value;
+    const endTime = document.getElementById('end-time').value;
+    const file = fileInput.files[0];
+
+    // Verificações de entrada
+    if (!ip) {
+        alert('Por favor, insira o IP do servidor.');
+        return;
+    }
+
+    if (!file) {
+        alert('Nenhum arquivo foi selecionado.');
+        return;
+    }
+
+    if (!startTime || !endTime) {
+        alert('Por favor, preencha os horários de início e fim.');
+        return;
+    }
+
+    // Configurando o envio
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('start_time', startTime);
+    formData.append('end_time', endTime);
+
+    // Mostra a mensagem "Enviando mídia..."
+    uploadStatus.textContent = 'Enviando mídia...';
+
+    fetch(`http://${ip}:5000/upload`, {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Mensagem de sucesso
+                alert('Mídia enviada com sucesso!');
+                fetchData(ip); // Atualiza a lista de mídias
+
+                // Zera os campos de entrada
+                fileInput.value = '';
+                fileNameSpan.textContent = 'Nenhum arquivo selecionado';
+                document.getElementById('start-time').value = '';
+                document.getElementById('end-time').value = '';
+                uploadBtn.disabled = true;
+
+                // Remove a mensagem "Enviando mídia..."
+                uploadStatus.textContent = '';
+            } else {
+                // Em caso de erro no servidor
+                alert(data.message || 'Erro ao enviar a mídia.');
+                uploadStatus.textContent = ''; // Remove a mensagem
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Erro ao enviar a mídia.');
+            uploadStatus.textContent = ''; // Remove a mensagem em caso de erro
+        });
+});
+
+        // Popular tabelas de mídias
+        function populateMediaList(media) {
+            mediaList.innerHTML = '';
+            if (media.length === 0) {
+                mediaList.innerHTML = '<tr><td colspan="5">Nenhuma mídia ativa encontrada.</td></tr>';
+            } else {
+                media.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.size} MB</td>
+                        <td>${item.start_time || '-'};</td>
+                        <td>${item.end_time || '-'};</td>
+                        <td><button class="delete-btn" onclick="deleteMedia('${item.name}', 'active')">Excluir</button></td>
+                    `;
+                    mediaList.appendChild(row);
+                });
+            }
+        }
+
+        function populateInactiveMediaList(media) {
+            inactiveMediaList.innerHTML = '';
+            if (media.length === 0) {
+                inactiveMediaList.innerHTML = '<tr><td colspan="5">Nenhuma mídia inativa encontrada.</td></tr>';
+            } else {
+                media.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.size} MB</td>
+                        <td>${item.start_time || '-'};</td>
+                        <td>${item.end_time || '-'};</td>
+                        <td><button class="delete-btn" onclick="deleteMedia('${item.name}', 'inactive')">Excluir</button></td>
+                    `;
+                    inactiveMediaList.appendChild(row);
+                });
+            }
+        }
+
+        // Excluir mídia
+        function deleteMedia(name, folder) {
+    const ip = tailscaleIpInput.value.trim();
+    if (!ip) return;
+
+    fetch(`http://${ip}:5000/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: name, folder: folder }) // Envia o nome do arquivo e a pasta
+    })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            fetchData(ip); // Atualiza as tabelas
+        })
+        .catch(() => alert('Erro ao excluir a mídia.'));
+}
+
+    </script>
+</body>
+</html>

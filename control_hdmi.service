@@ -1,0 +1,12 @@
+[Unit]
+Description=HDMI Control Service
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/control_hdmi.sh on
+ExecStop=/home/control_hdmi.sh off
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

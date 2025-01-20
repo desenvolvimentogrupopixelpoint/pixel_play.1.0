@@ -1,0 +1,14 @@
+[Unit]
+Description=Play Videos Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pixelpoint/play_videos.py
+WorkingDirectory=/home/pixelpoint
+Restart=always
+User=root
+Environment=DISPLAY=:0
+ExecStartPre=/bin/sleep 5
+
+[Install]
+WantedBy=multi-user.target
