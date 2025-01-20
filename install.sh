@@ -2,34 +2,30 @@
 
 set -e
 
-# Definindo o caminho base do GitHub
-BASE_URL="https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main"
-
-# Função para verificar e relatar erros
-function check_status {
-    if [ $? -ne 0 ]; then
-        echo "Erro na etapa: $1"
-        exit 1
-    fi
-}
+# Definindo o caminho base como o diretório onde o script está
+BASE_DIR=$(dirname "$(readlink -f "$0")")
 
 # Atualização do sistema
 echo "Atualizando o sistema..."
-sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y && sudo apt clean
-check_status "Atualização do sistema"
+sudo apt update
+sudo apt upgrade -y
+sudo apt autoremove -y
+sudo apt clean
 
 # Instalando pacotes necessários
 echo "Instalando pacotes necessários..."
-sudo apt install -y mpv fim python3 python3-pip python3-venv python3-dev \
-    libdrm-dev libx11-dev libva-dev libvdpau-dev libxcb-shm0-dev libxext-dev \
-    libxcb1-dev libasound2-dev mesa-va-drivers mesa-vdpau-drivers vdpauinfo vainfo
-check_status "Instalação de pacotes"
+sudo apt install -y mpv fim python3 python3-pip python3-venv python3-dev libdrm-dev libx11-dev libva-dev libvdpau-dev libxcb-shm0-dev libxext-dev libxcb1-dev libasound2-dev mesa-va-drivers mesa-vdpau-drivers vdpauinfo vainfo
 
 # Criando pastas e configurando permissões
 echo "Criando pastas e configurando permissões..."
-mkdir -p ~/.config/mpv /home/pixelpoint/templates /home/pixelpoint/videos /home/pixelpoint/midias_inativas
-chmod -R 777 ~/.config/mpv /home /home/pixelpoint /home/pixelpoint/templates /home/pixelpoint/videos /home/pixelpoint/midias_inativas
-check_status "Criação de pastas e permissões"
+mkdir -p ~/.config/mpv
+chmod -R 777 ~/.config/mpv
+mkdir -p /home/templates
+mkdir -p /home/videos
+mkdir -p /home/midias_inativas
+chmod -R 777 /home/templates
+chmod -R 777 /home/videos
+chmod -R 777 /home/midias_inativas
 
 # Criando o arquivo mpv.conf
 echo "Configurando mpv.conf..."
@@ -38,58 +34,91 @@ hwdec=auto
 vo=gpu
 gpu-context=x11
 EOF
-check_status "Configuração do mpv.conf"
 
-# Movendo arquivos para os diretórios apropriados
-echo "Baixando e movendo arquivos para os diretórios..."
-curl -fsSL "$BASE_URL/Logo.png" -o /home/Logo.png
-check_status "Baixar Logo.png"
+# Movendo arquivos para os diretórios
+echo "Movendo arquivos para os diretórios..."
+cp "$BASE_DIR/Logo.png" /home/ || { echo "Erro ao mover Logo.png"; exit 1; }
+cp "$BASE_DIR/templates/Index.html" /home/templates/ || { echo "Erro ao mover Index.html"; exit 1; }
+cp "$BASE_DIR/templates/logop.png" /home/templates/ || { echo "Erro ao mover logop.png"; exit 1; }
+echo "{}" > /home/metadata.json
 
-curl -fsSL "$BASE_URL/templates/Index.html" -o /home/pixelpoint/templates/Index.html
-check_status "Baixar Index.html"
+# Criando o script de controle do HDMI
+echo "Criando script de controle do HDMI..."
+cat <<'EOF' > /root/control_hdmi.sh
+#!/bin/bash
 
-curl -fsSL "$BASE_URL/templates/logop.png" -o /home/pixelpoint/templates/logop.png
-check_status "Baixar logop.png"
+CONFIG_FILE="/boot/armbianEnv.txt"
 
-curl -fsSL "$BASE_URL/control_hdmi.sh" -o /root/control_hdmi.sh
-chmod +x /root/control_hdmi.sh
-check_status "Baixar control_hdmi.sh"
+# Adiciona um atraso de 30 segundos antes de executar qualquer ação
+sleep 5 
 
-curl -fsSL "$BASE_URL/metadata.json" -o /home/pixelpoint/metadata.json
-check_status "Baixar metadata.json"
+if [[ "$1" == "off" ]]; then
+    # Desligar HDMI
+    sed -i 's/^#extraargs=video=HDMI-A-1:d/extraargs=video=HDMI-A-1:d/' "$CONFIG_FILE"
+    echo "HDMI desligado às $(date)" >> /var/log/hdmi_control.log
+elif [[ "$1" == "on" ]]; then
+    # Ligar HDMI
+    sed -i 's/^extraargs=video=HDMI-A-1:d/#extraargs=video=HDMI-A-1:d/' "$CONFIG_FILE"
+    echo "HDMI ligado às $(date)" >> /var/log/hdmi_control.log
+else
+    echo "Uso: $0 [on|off]"
+    exit 1
+fi
+
+# Reinicia o sistema para aplicar as mudanças
+/sbin/reboot
+EOF
+
+sudo chmod +x /root/control_hdmi.sh
+
+# Configurando visudo
+echo "Configurando permissões do visudo..."
+cat <<EOF | sudo tee -a /etc/sudoers
+root ALL=(ALL) NOPASSWD: /sbin/reboot
+EOF
 
 # Configurando cron para desligar e ligar HDMI
 echo "Configurando cron..."
 (crontab -l 2>/dev/null; echo "30 22 * * * /root/control_hdmi.sh off") | crontab -
 (crontab -l 2>/dev/null; echo "55 7 * * * /root/control_hdmi.sh on") | crontab -
 sudo systemctl restart cron
-check_status "Configuração do cron"
 
-# Configurando o serviço hdmi_control
+# Criando o serviço hdmi_control
 echo "Configurando serviço hdmi_control..."
-curl -fsSL "$BASE_URL/control_hdmi.service" -o /etc/systemd/system/hdmi_control.service
+cat <<EOF > /etc/systemd/system/hdmi_control.service
+[Unit]
+Description=HDMI Control Service
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /root/control_hdmi.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
 sudo systemctl enable hdmi_control.service
 sudo systemctl start hdmi_control.service
-check_status "Configuração do serviço hdmi_control"
 
 # Configurando rc.local
 echo "Configurando rc.local..."
 cat <<EOF > /etc/rc.local
 #!/bin/bash
-(sleep 4 && fim -q -a /home/pixelpoint/Logo.png) &
+(sleep 4 && fim -q -a /home/Logo.png) &
 exit 0
 EOF
 chmod +x /etc/rc.local
 sudo /etc/rc.local
-check_status "Configuração do rc.local"
 
 # Configurando o serviço play_videos
 echo "Configurando serviço play_videos..."
-curl -fsSL "$BASE_URL/play_videos.service" -o /etc/systemd/system/play_videos.service
+cp "$BASE_DIR/play_videos.service" /etc/systemd/system/play_videos.service || { echo "Erro ao mover play_videos.service"; exit 1; }
 chmod 644 /etc/systemd/system/play_videos.service
 sudo systemctl enable play_videos.service
 sudo systemctl start play_videos.service
-check_status "Configuração do serviço play_videos"
 
 # Instalando e configurando Tailscale
 echo "Instalando e configurando Tailscale..."
@@ -97,7 +126,6 @@ curl -fsSL https://tailscale.com/install.sh | sh
 sudo systemctl enable tailscaled
 sudo systemctl start tailscaled
 sudo tailscale status
-check_status "Instalação e configuração do Tailscale"
 
 # Finalizando
 echo "Instalação concluída com sucesso!"
