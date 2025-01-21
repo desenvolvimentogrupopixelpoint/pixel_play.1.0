@@ -18,7 +18,7 @@ sudo apt install -y mpv fim python3 python3-pip python3-venv python3-dev libdrm-
 
 # Instalando Flask
 echo "Instalando Flask..."
-pip3 install flask || { echo "Erro ao instalar Flask. Finalizando a instalação."; exit 1; }
+sudo pip3 install flask werkzeug --break-system-packages || { echo "Erro ao instalar Flask. Finalizando a instalação."; exit 1; }
 
 # Criando pastas e configurando permissões
 echo "Criando pastas e configurando permissões..."
