@@ -91,7 +91,7 @@ def serve_static(filename):
 
 @app.route('/')
 def index():
-    return render_template('/home/pixelpoint/templates/Index.html')
+    return render_template('Index.html')
 
 @app.route('/list', methods=['GET'])
 def list_files():
