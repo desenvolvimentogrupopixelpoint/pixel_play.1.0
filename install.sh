@@ -26,20 +26,20 @@ sudo pip3 install flask werkzeug --break-system-packages || { echo "Erro ao inst
 # Criando pastas e configurando permissões
 echo "Criando pastas e configurando permissões..."
 mkdir -p ~/.config/mpv
-chmod -R 777 ~/.config/mpv
+sudo chmod -R 777 ~/.config/mpv
 mkdir -p /home/videos
 mkdir -p /home/midias_inativas
 mkdir -p /home/pixelpoint/templates
-chmod -R 777 /home/videos
-chmod -R 777 /home/midias_inativas
-chmod -R 777 /home/pixelpoint
+sudo chmod -R 777 /home/videos
+sudo chmod -R 777 /home/midias_inativas
+sudo chmod -R 777 /home/pixelpoint
 
 # Movendo a pasta templates para pixelpoint
 echo "Movendo a pasta templates para /home/pixelpoint..."
 if [ -d "/home/templates" ]; then
     mv /home/templates /home/pixelpoint/templates || { echo "Erro ao mover a pasta templates"; exit 1; }
 fi
-chmod -R 777 /home/pixelpoint/templates
+sudo chmod -R 777 /home/pixelpoint/templates
 
 # Criando o arquivo mpv.conf
 echo "Configurando mpv.conf..."
@@ -57,7 +57,7 @@ curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixe
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
 echo "{}" > /home/metadata.json
 
-chmod -R 777 /home/pixelpoint/play_videos.py
+sudo chmod -R 777 /home/pixelpoint/play_videos.py
 sudo chmod a+rw /dev/dri/card
 
 # Configurando rc.local
@@ -67,13 +67,13 @@ cat <<EOF > /etc/rc.local
 (sleep 4 && fim -q -a /home/Logo.png) &
 exit 0
 EOF
-chmod +x /etc/rc.local
+sudo chmod +x /etc/rc.local
 sudo /etc/rc.local
 
 # Configurando o serviço play_videos
 echo "Configurando serviço play_videos..."
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.service -o /etc/systemd/system/play_videos.service || { echo "Erro ao baixar play_videos.service"; exit 1; }
-chmod 644 /etc/systemd/system/play_videos.service
+sudo chmod 644 /etc/systemd/system/play_videos.service
 sudo systemctl daemon-reload
 sudo systemctl enable play_videos.service
 sudo systemctl start play_videos.service
@@ -105,7 +105,7 @@ fi
 /sbin/reboot
 EOF
 
-chmod +x /root/control_hdmi.sh
+sudo chmod +x /root/control_hdmi.sh
 
 # Configurando agendador HDMI
 cat <<EOF > /root/hdmi_scheduler.py
@@ -148,7 +148,7 @@ except KeyboardInterrupt:
     print("\nPrograma encerrado pelo usuário.")
 EOF
 
-chmod +x /root/hdmi_scheduler.py
+sudo chmod +x /root/hdmi_scheduler.py
 
 cat <<EOF > /etc/systemd/system/hdmi_scheduler.service
 [Unit]
