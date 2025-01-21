@@ -47,7 +47,9 @@ def move_to_active(filename):
 
 
 def play_all_videos_in_loop():
+    UPLOAD_FOLDER = "/home/pixelpoint/videos"  # Define o caminho para a pasta de vídeos
     while True:
+        # Obtem todos os arquivos de vídeo da pasta, ordenados alfabeticamente
         files_in_active = sorted(
             [f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith('.mp4')]
         )
@@ -55,12 +57,14 @@ def play_all_videos_in_loop():
         if files_in_active:
             for file in files_in_active:
                 video_path = os.path.join(UPLOAD_FOLDER, file)
+                # Executa o vídeo usando MPV
                 subprocess.Popen([
-                    "mpv", "--fs", "--no-audio", "--quiet", "--vo=drm", 
-                    "--framedrop=vo", "--speed=1.1", "--loop", video_path
+                    "mpv", "--fs", "--no-audio", "--quiet", "--vo=drm",
+                    "--framedrop=vo", "--speed=1.1", video_path
                 ], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL).wait()
         else:
-            time.sleep(1)  # Wait if the folder is empty
+            # Espera 1 segundo se a pasta estiver vazia
+            time.sleep(1)
 
 
 
