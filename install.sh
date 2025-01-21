@@ -54,6 +54,8 @@ curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixe
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
 echo "{}" > /home/metadata.json
 
+chmod -R 777 /home/pixelpoint/play_videos.py
+
 # Configurando rc.local
 echo "Configurando rc.local..."
 cat <<EOF > /etc/rc.local
