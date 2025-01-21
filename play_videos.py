@@ -56,10 +56,12 @@ def play_all_videos_in_loop():
             for file in files_in_active:
                 video_path = os.path.join(UPLOAD_FOLDER, file)
                 subprocess.Popen([
-                    "mpv", "--fs", "--no-audio", "--quiet", "--gapless-audio", video_path
-], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL).wait()
+                    "mpv", "--fs", "--no-audio", "--quiet", "--vo=drm", "--vf=scale=640:360", 
+                    "--framedrop=vo", "--speed=1.1", "--loop", video_path
+                ], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL).wait()
         else:
             time.sleep(1)  # Wait if the folder is empty
+
 
 
 def monitor_media():
