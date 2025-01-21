@@ -7,6 +7,7 @@ BASE_DIR=$(dirname "$(readlink -f "$0")")
 
 # Atualização do sistema
 echo "Atualizando o sistema..."
+timedatectl set-timezone America/Sao_Paulo
 sudo apt update
 sudo apt upgrade -y
 sudo apt autoremove -y
@@ -50,7 +51,7 @@ EOF
 echo "Baixando e movendo arquivos para os diretórios..."
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/Logo.png -o /home/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Index.html -o /home/pixelpoint/templates/Index.html || { echo "Erro ao baixar Index.html"; exit 1; }
-curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/logop.png -o /home/pixelpoint/templates/logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Logop.png -o /home/pixelpoint/templates/Logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
 echo "{}" > /home/metadata.json
 
@@ -72,15 +73,108 @@ sudo systemctl daemon-reload
 sudo systemctl enable play_videos.service
 sudo systemctl start play_videos.service
 
+# Adicionando configuração HDMI
+echo "Configurando controle HDMI..."
+cat <<EOF > /root/control_hdmi.sh
+#!/bin/bash
+
+CONFIG_FILE="/boot/armbianEnv.txt"
+
+# Adiciona um atraso de 15 segundos antes de executar qualquer ação
+sleep 15
+
+if [[ "$1" == "off" ]]; then
+    # Desligar HDMI
+    sed -i 's/^#extraargs=video=HDMI-A-1:d/extraargs=video=HDMI-A-1:d/' "$CONFIG_FILE"
+    echo "HDMI desligado às $(date)" >> /var/log/hdmi_control.log
+elif [[ "$1" == "on" ]]; then
+    # Ligar HDMI
+    sed -i 's/^extraargs=video=HDMI-A-1:d/#extraargs=video=HDMI-A-1:d/' "$CONFIG_FILE"
+    echo "HDMI ligado às $(date)" >> /var/log/hdmi_control.log
+else
+    echo "Uso: $0 [on|off]"
+    exit 1
+fi
+
+# Reinicia o sistema para aplicar as mudanças
+/sbin/reboot
+EOF
+
+chmod +x /root/control_hdmi.sh
+
+# Configurando agendador HDMI
+cat <<EOF > /root/hdmi_scheduler.py
+import os
+from datetime import datetime
+import time
+
+def execute_hdmi_command(command):
+    if command == "on":
+        result = os.system("sudo /root/control_hdmi.sh on")
+        print(f"[{datetime.now()}] HDMI ligado. Resultado do comando: {result}")
+    elif command == "off":
+        result = os.system("sudo /root/control_hdmi.sh off")
+        print(f"[{datetime.now()}] HDMI desligado. Resultado do comando: {result}")
+
+# Configurar horários
+HDMI_OFF_TIME = "22:30"  # Horário para DESLIGAR
+HDMI_ON_TIME = "7:55"   # Horário para LIGAR
+
+print("Agendador HDMI iniciado. Aguardando horários programados...")
+
+try:
+    while True:
+        current_time = datetime.now().strftime("%H:%M")
+        print(f"[{datetime.now()}] Verificando horário: {current_time}")
+
+        if current_time == HDMI_OFF_TIME:
+            print(f"[{current_time}] Desligando HDMI...")
+            execute_hdmi_command("off")
+            time.sleep(60)  # Aguarda 1 minuto para evitar execução repetida
+
+        elif current_time == HDMI_ON_TIME:
+            print(f"[{current_time}] Ligando HDMI...")
+            execute_hdmi_command("on")
+            time.sleep(60)  # Aguarda 1 minuto para evitar execução repetida
+
+        time.sleep(1)  # Checa o horário a cada segundo
+
+except KeyboardInterrupt:
+    print("\nPrograma encerrado pelo usuário.")
+EOF
+
+chmod +x /root/hdmi_scheduler.py
+
+cat <<EOF > /etc/systemd/system/hdmi_scheduler.service
+[Unit]
+Description=Agendador HDMI
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /root/hdmi_scheduler.py
+WorkingDirectory=/root
+StandardOutput=append:/var/log/hdmi_scheduler.log
+StandardError=append:/var/log/hdmi_scheduler_error.log
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable hdmi_scheduler.service
+sudo systemctl start hdmi_scheduler.service
+
 # Instalando e configurando Tailscale
 echo "Instalando e configurando Tailscale..."
 curl -fsSL https://tailscale.com/install.sh | sh
 sudo systemctl enable tailscaled
 sudo systemctl start tailscaled
 
+# Finalizando
+echo "Instalação concluída com sucesso!"
+
 # Conexão com Tailscale
 echo "Conectando ao Tailscale..."
 sudo tailscale up
-
-# Finalizando
-echo "Instalação concluída com sucesso!"
