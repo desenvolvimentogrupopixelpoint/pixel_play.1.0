@@ -10,6 +10,9 @@ echo "Atualizando o sistema..."
 sudo apt update
 sudo apt upgrade -y
 sudo apt autoremove -y
+sudo apt install -y xserver-xorg x11-utils x11-xserver-utils
+sudo apt install -y libdrm-dev libgbm-dev
+sudo apt install -y mesa-utils mesa-va-drivers mesa-vdpau-drivers vainfo vdpauinfo
 sudo apt clean
 
 # Instalando pacotes necessários
@@ -55,6 +58,7 @@ curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixe
 echo "{}" > /home/metadata.json
 
 chmod -R 777 /home/pixelpoint/play_videos.py
+sudo chmod a+rw /dev/dri/card
 
 # Configurando rc.local
 echo "Configurando rc.local..."
