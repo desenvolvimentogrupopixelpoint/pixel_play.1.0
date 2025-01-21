@@ -7,7 +7,6 @@ BASE_DIR=$(dirname "$(readlink -f "$0")")
 
 # Atualização do sistema
 echo "Atualizando o sistema..."
-timedatectl set-timezone America/Sao_Paulo
 sudo apt update
 sudo apt upgrade -y
 sudo apt autoremove -y
@@ -174,6 +173,7 @@ sudo systemctl start tailscaled
 
 # Finalizando
 echo "Instalação concluída com sucesso!"
+sudo timedatectl set-timezone America/Sao_Paulo
 
 # Conexão com Tailscale
 echo "Conectando ao Tailscale..."
