@@ -9,7 +9,6 @@ import time
 
 UPLOAD_FOLDER = '/home/pixelpoint/videos'
 INACTIVE_FOLDER = '/home/pixelpoint/midias_inativas'
-LOGO_PATH = '/home/Logo.png'
 ALLOWED_EXTENSIONS = {'mp4'}
 METADATA_FILE = '/home/pixelpoint/metadata.json'
 
@@ -19,21 +18,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Ensure both folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(INACTIVE_FOLDER, exist_ok=True)
-
-
-def display_logo():
-    """Exibe o logo em tela cheia."""
-    LOGO_PATH = "/home/Logo.png"  # Certifique-se de que este caminho é válido
-    while True:
-        try:
-            subprocess.run([
-                "fim", "-q", "-a", LOGO_PATH
-            ], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-        except Exception as e:
-            print(f"Erro ao exibir logo: {str(e)}")
-        time.sleep(1)  # Tenta novamente após 1 segundo, caso haja erro
-
-
 
 
 def allowed_file(filename):
@@ -206,9 +190,6 @@ def delete_file():
 
 if __name__ == "__main__":
     try:
-        logo_thread = Thread(target=display_logo, daemon=True)
-        logo_thread.start()
-
         monitor_thread = Thread(target=monitor_media, daemon=True)
         monitor_thread.start()
 
