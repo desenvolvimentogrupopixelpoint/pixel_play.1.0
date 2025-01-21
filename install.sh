@@ -18,19 +18,16 @@ sudo apt install -y mpv fim python3 python3-pip python3-venv python3-dev libdrm-
 
 # Instalando Flask
 echo "Instalando Flask..."
-sudo pip3 install flask werkzeug --break-system-packages || { echo "Erro ao instalar Flask. Finalizando a instalação."; exit 1; }
+pip3 install flask || { echo "Erro ao instalar Flask. Finalizando a instalação."; exit 1; }
 
 # Criando pastas e configurando permissões
 echo "Criando pastas e configurando permissões..."
 mkdir -p ~/.config/mpv
 chmod -R 777 ~/.config/mpv
-mkdir -p /home/templates
-mkdir -p /home/videos
-mkdir -p /home/midias_inativas
+mkdir -p /home/pixelpoint/templates
+mkdir -p /home/pixelpoint/videos
+mkdir -p /home/pixelpoint/midias_inativas
 mkdir -p /home/pixelpoint
-chmod -R 777 /home/templates
-chmod -R 777 /home/videos
-chmod -R 777 /home/midias_inativas
 chmod -R 777 /home/pixelpoint
 
 # Criando o arquivo mpv.conf
@@ -43,17 +40,17 @@ EOF
 
 # Movendo arquivos para os diretórios
 echo "Movendo arquivos para os diretórios..."
-curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/Logo.png -o /home/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
+curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/Logo.png -o /home/pixelpoint/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Index.html -o /home/pixelpoint/templates/Index.html || { echo "Erro ao baixar Index.html"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/logop.png -o /home/pixelpoint/templates/logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
-echo "{}" > /home/metadata.json
+echo "{}" > /home/pixelpoint/metadata.json
 
 # Configurando rc.local
 echo "Configurando rc.local..."
 cat <<EOF > /etc/rc.local
 #!/bin/bash
-(sleep 4 && fim -q -a /home/Logo.png) &
+(sleep 4 && fim -q -a /home/pixelpoint/Logo.png) &
 exit 0
 EOF
 chmod +x /etc/rc.local
