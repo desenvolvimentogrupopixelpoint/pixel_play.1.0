@@ -16,6 +16,10 @@ sudo apt clean
 echo "Instalando pacotes necessários..."
 sudo apt install -y mpv fim python3 python3-pip python3-venv python3-dev libdrm-dev libx11-dev libva-dev libvdpau-dev libxcb-shm0-dev libxext-dev libxcb1-dev libasound2-dev mesa-va-drivers mesa-vdpau-drivers vdpauinfo vainfo
 
+# Instalando Flask
+echo "Instalando Flask..."
+sudo pip3 install flask werkzeug --break-system-packages || { echo "Erro ao instalar Flask. Finalizando a instalação."; exit 1; }
+
 # Criando pastas e configurando permissões
 echo "Criando pastas e configurando permissões..."
 mkdir -p ~/.config/mpv
@@ -38,7 +42,7 @@ gpu-context=x11
 EOF
 
 # Movendo arquivos para os diretórios
-echo "Baixando e movendo arquivos para os diretórios..."
+echo "Movendo arquivos para os diretórios..."
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/Logo.png -o /home/Logo.png || { echo "Erro ao baixar Logo.png"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Index.html -o /home/templates/Index.html || { echo "Erro ao baixar Index.html"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/logop.png -o /home/templates/logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
@@ -71,7 +75,7 @@ sudo systemctl start tailscaled
 
 # Conexão com Tailscale
 echo "Conectando ao Tailscale..."
-sudo tailscale up || { echo "Erro ao conectar ao Tailscale. Por favor, conecte manualmente."; exit 1; }
+sudo tailscale up
 
 # Finalizando
 echo "Instalação concluída com sucesso!"
