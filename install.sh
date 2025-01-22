@@ -101,24 +101,14 @@ EOF
 
 chmod +x /root/control_hdmi.sh
 
-# Sistema para adicionar linha ao final do arquivo
-cat <<EOF > /root/add_hdmi_config.sh
-#!/bin/bash
-
-CONFIG_FILE="/boot/armbianEnv.txt"
-
-# Verifica se a linha já existe, caso contrário, adiciona ao final do arquivo
-if ! grep -q "^extraargs=video=HDMI-A-1:d" "\$CONFIG_FILE"; then
-    echo "Adicionando linha 'extraargs=video=HDMI-A-1:d' ao final do arquivo."
-    echo "extraargs=video=HDMI-A-1:d" >> "\$CONFIG_FILE"
-    echo "Linha adicionada com sucesso em \$(date)" >> /var/log/hdmi_addition.log
+# ADICIONANDO A LINHA NA ÚLTIMA LINHA DO ARQUIVO
+echo "Adicionando 'extraargs=video=HDMI-A-1:d' na última linha do arquivo /boot/armbianEnv.txt..."
+if ! grep -q "^extraargs=video=HDMI-A-1:d" /boot/armbianEnv.txt; then
+    echo "extraargs=video=HDMI-A-1:d" | sudo tee -a /boot/armbianEnv.txt > /dev/null
+    echo "Linha adicionada com sucesso."
 else
-    echo "Linha 'extraargs=video=HDMI-A-1:d' já existe. Nenhuma ação realizada."
-    echo "Linha já existente em \$(date)" >> /var/log/hdmi_addition.log
+    echo "Linha já existente. Nenhuma alteração feita."
 fi
-EOF
-
-chmod +x /root/add_hdmi_config.sh
 
 # Configurando agendador HDMI
 cat <<EOF > /root/hdmi_scheduler.py
