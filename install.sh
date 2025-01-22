@@ -82,16 +82,16 @@ CONFIG_FILE="/boot/armbianEnv.txt"
 # Adiciona um atraso de 15 segundos antes de executar qualquer ação
 sleep 15
 
-if [[ "$1" == "off" ]]; then
+if [[ "\$1" == "off" ]]; then
     # Desligar HDMI
-    sed -i 's/^#extraargs=video=HDMI-A-1:d/extraargs=video=HDMI-A-1:d/' "$CONFIG_FILE"
-    echo "HDMI desligado às $(date)" >> /var/log/hdmi_control.log
-elif [[ "$1" == "on" ]]; then
+    sed -i 's/^#extraargs=video=HDMI-A-1:d/extraargs=video=HDMI-A-1:d/' "\$CONFIG_FILE"
+    echo "HDMI desligado às \$(date)" >> /var/log/hdmi_control.log
+elif [[ "\$1" == "on" ]]; then
     # Ligar HDMI
-    sed -i 's/^extraargs=video=HDMI-A-1:d/#extraargs=video=HDMI-A-1:d/' "$CONFIG_FILE"
-    echo "HDMI ligado às $(date)" >> /var/log/hdmi_control.log
+    sed -i 's/^extraargs=video=HDMI-A-1:d/#extraargs=video=HDMI-A-1:d/' "\$CONFIG_FILE"
+    echo "HDMI ligado às \$(date)" >> /var/log/hdmi_control.log
 else
-    echo "Uso: $0 [on|off]"
+    echo "Uso: \$0 [on|off]"
     exit 1
 fi
 
@@ -100,6 +100,25 @@ fi
 EOF
 
 chmod +x /root/control_hdmi.sh
+
+# Sistema para adicionar linha ao final do arquivo
+cat <<EOF > /root/add_hdmi_config.sh
+#!/bin/bash
+
+CONFIG_FILE="/boot/armbianEnv.txt"
+
+# Verifica se a linha já existe, caso contrário, adiciona ao final do arquivo
+if ! grep -q "^extraargs=video=HDMI-A-1:d" "\$CONFIG_FILE"; then
+    echo "Adicionando linha 'extraargs=video=HDMI-A-1:d' ao final do arquivo."
+    echo "extraargs=video=HDMI-A-1:d" >> "\$CONFIG_FILE"
+    echo "Linha adicionada com sucesso em \$(date)" >> /var/log/hdmi_addition.log
+else
+    echo "Linha 'extraargs=video=HDMI-A-1:d' já existe. Nenhuma ação realizada."
+    echo "Linha já existente em \$(date)" >> /var/log/hdmi_addition.log
+fi
+EOF
+
+chmod +x /root/add_hdmi_config.sh
 
 # Configurando agendador HDMI
 cat <<EOF > /root/hdmi_scheduler.py
