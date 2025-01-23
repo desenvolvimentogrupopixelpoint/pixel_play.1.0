@@ -175,7 +175,6 @@ sudo systemctl daemon-reload
 sudo systemctl enable hdmi_scheduler.service
 sudo systemctl start hdmi_scheduler.service
 sudo systemctl restart hdmi_scheduler.service
-sudo systemctl status hdmi_scheduler.service
 
 # Instalando e configurando Tailscale
 echo "Instalando e configurando Tailscale..."
