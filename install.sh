@@ -153,6 +153,33 @@ EOF
 
 chmod +x /root/hdmi_scheduler.py
 
+# Criando o arquivo hdmi_scheduler.service
+echo "Configurando o serviço hdmi_scheduler..."
+cat <<EOF > /etc/systemd/system/hdmi_scheduler.service
+[Unit]
+Description=Agendador HDMI
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/hdmi_scheduler.py
+WorkingDirectory=/root
+StandardOutput=append:/var/log/hdmi_scheduler.log
+StandardError=append:/var/log/hdmi_scheduler_error.log
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Salvando e ativando o serviço
+sudo systemctl daemon-reload
+sudo systemctl enable hdmi_scheduler.service
+sudo systemctl start hdmi_scheduler.service
+echo "Serviço hdmi_scheduler configurado e iniciado com sucesso!"
+
+
 # Instalando e configurando Tailscale
 echo "Instalando e configurando Tailscale..."
 curl -fsSL https://tailscale.com/install.sh | sh
