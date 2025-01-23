@@ -5,6 +5,13 @@ set -e
 # Definindo o caminho base como o diretório onde o script está
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 
+# Atualização do sistema
+echo "Atualizando o sistema..."
+sudo apt update
+sudo apt upgrade -y
+sudo apt autoremove -y
+sudo apt clean
+
 # Configurando rc.local
 echo "Configurando rc.local..."
 cat <<EOF > /etc/rc.local
@@ -14,13 +21,6 @@ exit 0
 EOF
 chmod +x /etc/rc.local
 sudo /etc/rc.local
-
-# Atualização do sistema
-echo "Atualizando o sistema..."
-sudo apt update
-sudo apt upgrade -y
-sudo apt autoremove -y
-sudo apt clean
 
 # Instalando pacotes necessários
 echo "Instalando pacotes necessários..."
