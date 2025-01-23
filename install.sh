@@ -126,7 +126,7 @@ def execute_hdmi_command(command):
 
 # Configurar horários
 HDMI_OFF_TIME = "22:30"  # Horário para DESLIGAR
-HDMI_ON_TIME = "7:55"   # Horário para LIGAR
+HDMI_ON_TIME = "07:55"   # Horário para LIGAR
 
 print("Agendador HDMI iniciado. Aguardando horários programados...")
 
@@ -151,7 +151,7 @@ except KeyboardInterrupt:
     print("\nPrograma encerrado pelo usuário.")
 EOF
 
-chmod +x /root/hdmi_scheduler.py
+sudo chmod +x /root/hdmi_scheduler.py
 
 cat <<EOF > /etc/systemd/system/hdmi_scheduler.service
 [Unit]
@@ -165,6 +165,7 @@ StandardOutput=append:/var/log/hdmi_scheduler.log
 StandardError=append:/var/log/hdmi_scheduler_error.log
 Restart=always
 User=root
+Type=forking
 
 [Install]
 WantedBy=multi-user.target
@@ -173,6 +174,8 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable hdmi_scheduler.service
 sudo systemctl start hdmi_scheduler.service
+sudo systemctl restart hdmi_scheduler.service
+sudo systemctl status hdmi_scheduler.service
 
 # Instalando e configurando Tailscale
 echo "Instalando e configurando Tailscale..."
