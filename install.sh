@@ -151,7 +151,7 @@ except KeyboardInterrupt:
     print("\nPrograma encerrado pelo usuário.")
 EOF
 
-sudo chmod +x /root/hdmi_scheduler.py
+chmod +x /root/hdmi_scheduler.py
 
 cat <<EOF > /etc/systemd/system/hdmi_scheduler.service
 [Unit]
@@ -174,7 +174,6 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable hdmi_scheduler.service
 sudo systemctl start hdmi_scheduler.service
-sudo systemctl restart hdmi_scheduler.service
 
 # Instalando e configurando Tailscale
 echo "Instalando e configurando Tailscale..."
