@@ -102,9 +102,9 @@ EOF
 chmod +x /root/control_hdmi.sh
 
 # ADICIONANDO A LINHA NA ÚLTIMA LINHA DO ARQUIVO
-echo "Adicionando 'extraargs=video=HDMI-A-1:d' na última linha do arquivo /boot/armbianEnv.txt..."
-if ! grep -q "^extraargs=video=HDMI-A-1:d" /boot/armbianEnv.txt; then
-    echo "extraargs=video=HDMI-A-1:d" | sudo tee -a /boot/armbianEnv.txt > /dev/null
+echo "Adicionando '#extraargs=video=HDMI-A-1:d' na última linha do arquivo /boot/armbianEnv.txt..."
+if ! grep -q "^#extraargs=video=HDMI-A-1:d" /boot/armbianEnv.txt; then
+    echo "#extraargs=video=HDMI-A-1:d" | sudo tee -a /boot/armbianEnv.txt > /dev/null
     echo "Linha adicionada com sucesso."
 else
     echo "Linha já existente. Nenhuma alteração feita."
