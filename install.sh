@@ -5,6 +5,16 @@ set -e
 # Definindo o caminho base como o diretório onde o script está
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 
+# Configurando rc.local
+echo "Configurando rc.local..."
+cat <<EOF > /etc/rc.local
+#!/bin/bash
+(sleep 4 && fim -q -a /home/Logo.png) &
+exit 0
+EOF
+chmod +x /etc/rc.local
+sudo /etc/rc.local
+
 # Atualização do sistema
 echo "Atualizando o sistema..."
 sudo apt update
@@ -53,16 +63,6 @@ curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixe
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Logop.png -o /home/pixelpoint/templates/Logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
 echo "{}" > /home/metadata.json
-
-# Configurando rc.local
-echo "Configurando rc.local..."
-cat <<EOF > /etc/rc.local
-#!/bin/bash
-(sleep 4 && fim -q -a /home/Logo.png) &
-exit 0
-EOF
-chmod +x /etc/rc.local
-sudo /etc/rc.local
 
 # Configurando o serviço play_videos
 echo "Configurando serviço play_videos..."
