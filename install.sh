@@ -16,7 +16,7 @@ sudo apt clean
 echo "Configurando rc.local..."
 cat <<EOF > /etc/rc.local
 #!/bin/bash
-(sleep 4 && fim -q -a /home/Logo.png) &
+(sleep 15 && fim -q -a /home/Logo.png) &
 exit 0
 EOF
 chmod +x /etc/rc.local
