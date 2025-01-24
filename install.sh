@@ -96,7 +96,7 @@ else
 fi
 
 # Reinicia o sistema para aplicar as mudanças
-/sbin/reboot
+sudo reboot -f
 EOF
 
 chmod +x /root/control_hdmi.sh
