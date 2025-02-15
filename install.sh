@@ -12,15 +12,7 @@ sudo apt upgrade -y
 sudo apt autoremove -y
 sudo apt clean
 
-# Configurando rc.local
-echo "Configurando rc.local..."
-cat <<EOF > /etc/rc.local
-#!/bin/bash
-(sleep 15 && fim -q -a /home/Logo.png) &
-exit 0
-EOF
-chmod +x /etc/rc.local
-sudo /etc/rc.local
+
 
 # Instalando pacotes necessários
 echo "Instalando pacotes necessários..."
@@ -64,6 +56,10 @@ curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixe
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/templates/Logop.png -o /home/pixelpoint/templates/Logop.png || { echo "Erro ao baixar logop.png"; exit 1; }
 curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
 echo "{}" > /home/metadata.json
+
+# Definindo a Logo.png como papel de parede
+echo "Definindo papel de parede..."
+pcmanfm --set-wallpaper /home/Logo.png
 
 # Configurando o serviço play_videos
 echo "Configurando serviço play_videos..."
