@@ -54,12 +54,13 @@ def is_vlc_running():
 
 
 def play_all_videos_in_loop():
-    """Executa MPV para reproduzir vídeos da pasta, parando se não houver arquivos."""
-
+    """Executa MPV para reproduzir vídeos da pasta e atualiza a playlist dinamicamente."""
+    
     os.environ["XDG_RUNTIME_DIR"] = "/run/user/1000"  # Define a variável necessária
 
+    video_folder = "/home/pixelpoint/videos"
+
     while True:
-        video_folder = "/home/pixelpoint/videos"
         video_files = [f for f in os.listdir(video_folder) if f.lower().endswith('.mp4')]
 
         if not video_files:
@@ -70,20 +71,21 @@ def play_all_videos_in_loop():
         print("🎥 Iniciando MPV para reprodução de vídeos...")
 
         process = subprocess.Popen(
-            "mpv --fs --loop=inf /home/pixelpoint/videos/*",
+            f"mpv --fs --playlist=<(ls {video_folder}/*.mp4) --loop-playlist",
             shell=True,
+            executable="/bin/bash",
             env={"DISPLAY": ":0", "XDG_RUNTIME_DIR": "/run/user/1000"}
         )
 
-        # Monitorar se os vídeos ainda existem
         while process.poll() is None:
-            time.sleep(2)  # Aguarda um pouco antes de verificar novamente
-            video_files = [f for f in os.listdir(video_folder) if f.lower().endswith('.mp4')]
-            
-            if not video_files:
-                print("🛑 Nenhum vídeo encontrado. Parando MPV...")
-                process.terminate()  # Encerra o MPV
-                break  # Sai do loop de monitoramento
+            time.sleep(2)  # Verifica a cada 2 segundos
+
+            video_files_now = [f for f in os.listdir(video_folder) if f.lower().endswith('.mp4')]
+
+            if video_files_now != video_files:  # Se houve alteração nos vídeos
+                print("🔄 Mudança detectada na pasta. Reiniciando MPV...")
+                process.terminate()  # Para o MPV
+                break  # Sai do loop e reinicia
 
         print("⚠️ MPV foi encerrado. Reiniciando em 5 segundos...")
         time.sleep(5)
