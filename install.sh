@@ -40,8 +40,6 @@ mkdir -p /home/pixelpoint/templates
 chmod -R 777 /home/videos
 chmod -R 777 /home/midias_inativas
 chmod -R 777 /home/pixelpoint
-mv /home/midias_inativas /home/videos/* /home/pixelpoint/videos/ && rm -r /home/videos
-
 
 
 # Movendo a pasta templates para pixelpoint
