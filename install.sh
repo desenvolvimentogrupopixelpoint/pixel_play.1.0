@@ -69,6 +69,15 @@ sudo systemctl daemon-reload
 sudo systemctl enable play_videos.service
 sudo systemctl start play_videos.service
 
+# Configurando desligamento automático às 22:25 via Crontab do root
+echo "Configurando desligamento automático diário às 22:25..."
+(sudo crontab -l 2>/dev/null; echo "25 22 * * * /sbin/shutdown -h now") | sudo crontab -
+
+# Finalizando
+echo "Instalação concluída com sucesso!"
+sudo timedatectl set-timezone America/Sao_Paulo
+
+
 # Instalando e configurando Tailscale
 echo "Instalando e configurando Tailscale..."
 curl -fsSL https://tailscale.com/install.sh | sh
