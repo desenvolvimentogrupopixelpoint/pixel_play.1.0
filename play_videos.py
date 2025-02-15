@@ -46,24 +46,47 @@ def move_to_active(filename):
         os.rename(source_path, target_path)
 
 
+def is_vlc_running():
+    """Verifica se o VLC já está rodando."""
+    result = subprocess.run(["pgrep", "-x", "vlc"], stdout=subprocess.PIPE)
+    return result.returncode == 0  # Retorna True se o VLC já estiver rodando
+
+
+
 def play_all_videos_in_loop():
-    UPLOAD_FOLDER = "/home/pixelpoint/videos"  # Define o caminho para a pasta de vídeos
+    """Executa MPV para reproduzir vídeos da pasta, parando se não houver arquivos."""
+
+    os.environ["XDG_RUNTIME_DIR"] = "/run/user/1000"  # Define a variável necessária
+
     while True:
-        # Obtem todos os arquivos de vídeo da pasta, ordenados alfabeticamente
-        files_in_active = sorted(
-            [f for f in os.listdir(UPLOAD_FOLDER) if f.lower().endswith('.mp4')]
+        video_folder = "/home/pixelpoint/videos"
+        video_files = [f for f in os.listdir(video_folder) if f.lower().endswith('.mp4')]
+
+        if not video_files:
+            print("⏳ Nenhum vídeo encontrado. Aguardando novos arquivos...")
+            time.sleep(5)
+            continue  # Volta para o início do loop sem rodar o MPV
+
+        print("🎥 Iniciando MPV para reprodução de vídeos...")
+
+        process = subprocess.Popen(
+            "mpv --fs --loop=inf /home/pixelpoint/videos/*",
+            shell=True,
+            env={"DISPLAY": ":0", "XDG_RUNTIME_DIR": "/run/user/1000"}
         )
 
-        if files_in_active:
-            for file in files_in_active:
-                video_path = os.path.join(UPLOAD_FOLDER, file)
-                # Executa o vídeo usando VLC (cvlc)
-                subprocess.Popen([
-                    "cvlc", "--fullscreen", "--loop", "--quiet", video_path
-                ], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL).wait()
-        else:
-            # Espera 1 segundo se a pasta estiver vazia
-            time.sleep(1)
+        # Monitorar se os vídeos ainda existem
+        while process.poll() is None:
+            time.sleep(2)  # Aguarda um pouco antes de verificar novamente
+            video_files = [f for f in os.listdir(video_folder) if f.lower().endswith('.mp4')]
+            
+            if not video_files:
+                print("🛑 Nenhum vídeo encontrado. Parando MPV...")
+                process.terminate()  # Encerra o MPV
+                break  # Sai do loop de monitoramento
+
+        print("⚠️ MPV foi encerrado. Reiniciando em 5 segundos...")
+        time.sleep(5)
 
 
 
