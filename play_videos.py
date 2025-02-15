@@ -57,10 +57,9 @@ def play_all_videos_in_loop():
         if files_in_active:
             for file in files_in_active:
                 video_path = os.path.join(UPLOAD_FOLDER, file)
-                # Executa o vídeo usando MPV
+                # Executa o vídeo usando VLC (cvlc)
                 subprocess.Popen([
-                    "mpv", "--fs", "--no-audio", "--quiet", "--vo=drm",
-                    "--framedrop=vo", "--speed=1.1", video_path
+                    "cvlc", "--fullscreen", "--loop", "--quiet", video_path
                 ], stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL).wait()
         else:
             # Espera 1 segundo se a pasta estiver vazia
