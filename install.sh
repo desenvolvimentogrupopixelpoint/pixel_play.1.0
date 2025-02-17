@@ -6,7 +6,6 @@ set -e
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 
 # Atualização do sistema
-sudo su
 sudo echo "Atualizando o sistema..."
 sudo apt update
 sudo apt upgrade -y
@@ -77,8 +76,6 @@ sudo timedatectl set-timezone America/Sao_Paulo
 # Definindo a Logo.png como papel de parede
 sudo echo "Definindo papel de parede..."
 DISPLAY=:0 pcmanfm --set-wallpaper /home/Logo.png
-
-exit 
 
 # Instalando e configurando Tailscale
 sudo echo "Instalando e configurando Tailscale..."
