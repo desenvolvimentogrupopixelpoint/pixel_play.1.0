@@ -73,10 +73,6 @@ sudo echo "Configurando desligamento automático diário às 22:25..."
 sudo echo "Instalação concluída com sucesso!"
 sudo timedatectl set-timezone America/Sao_Paulo
 
-# Definindo a Logo.png como papel de parede
-sudo echo "Definindo papel de parede..."
-DISPLAY=:0 pcmanfm --set-wallpaper /home/Logo.png
-
 # Instalando e configurando Tailscale
 sudo echo "Instalando e configurando Tailscale..."
 sudo curl -fsSL https://tailscale.com/install.sh | sh
