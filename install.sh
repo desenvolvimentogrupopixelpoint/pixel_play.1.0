@@ -57,10 +57,6 @@ sudo curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint
 sudo curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.py -o /home/pixelpoint/play_videos.py || { echo "Erro ao baixar play_videos.py"; exit 1; }
 sudo echo "{}" > /home/metadata.json
 
-# Definindo a Logo.png como papel de parede
-sudo echo "Definindo papel de parede..."
-pcmanfm --set-wallpaper /home/Logo.png
-
 # Configurando o serviço play_videos
 sudo echo "Configurando serviço play_videos..."
 sudo curl -fsSL https://raw.githubusercontent.com/desenvolvimentogrupopixelpoint/pixel_play.1.0/main/play_videos.service -o /etc/systemd/system/play_videos.service || { echo "Erro ao baixar play_videos.service"; exit 1; }
@@ -77,6 +73,9 @@ sudo echo "Configurando desligamento automático diário às 22:25..."
 sudo echo "Instalação concluída com sucesso!"
 sudo timedatectl set-timezone America/Sao_Paulo
 
+# Definindo a Logo.png como papel de parede
+sudo echo "Definindo papel de parede..."
+pcmanfm --set-wallpaper /home/Logo.png
 
 # Instalando e configurando Tailscale
 sudo echo "Instalando e configurando Tailscale..."
